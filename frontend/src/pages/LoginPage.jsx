@@ -23,6 +23,8 @@ const LoginPage = () => {
         navigate('/staff/dashboard');
       } else if (role === 'ADMIN') {
         navigate('/admin/dashboard');
+      } else if (role === 'PATIENT') {
+        navigate('/patient/dashboard');
       } else {
         navigate('/dashboard');
       }
@@ -58,6 +60,12 @@ const LoginPage = () => {
           </div>
           <button type="submit">Login</button>
         </form>
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <p>Don't have an account?</p>
+          <a href="/patient/register" style={{ color: '#007bff', textDecoration: 'none' }}>
+            Register as Patient
+          </a>
+        </div>
       </div>
     </div>
   );

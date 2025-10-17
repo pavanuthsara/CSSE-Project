@@ -1,15 +1,15 @@
 package com.pavan.csse.backend.service;
 
 import com.pavan.csse.backend.model.*;
-import com.pavan.csse.backend.repository.DoctorRepository;
-import com.pavan.csse.backend.repository.StaffRepository;
-import com.pavan.csse.backend.repository.UserRepository;
+import com.pavan.csse.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 public class DataInitializationService implements CommandLineRunner {
@@ -24,11 +24,18 @@ public class DataInitializationService implements CommandLineRunner {
     private StaffRepository staffRepository;
     
     @Autowired
+    private PatientRepository patientRepository;
+    
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
+    
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
         initializeTestUsers();
+        initializeTimeSlots();
     }
 
     private void initializeTestUsers() {
@@ -47,6 +54,11 @@ public class DataInitializationService implements CommandLineRunner {
             createTestAdmin();
         }
 
+        // Create test patient if not exists
+        if (!userRepository.existsByUsername("patient1")) {
+            createTestPatient();
+        }
+
         System.out.println("=== TEST LOGIN CREDENTIALS ===");
         System.out.println("Doctor Login:");
         System.out.println("  Username: doctor1");
@@ -58,6 +70,10 @@ public class DataInitializationService implements CommandLineRunner {
         System.out.println("");
         System.out.println("Admin Login:");
         System.out.println("  Username: admin1");
+        System.out.println("  Password: password123");
+        System.out.println("");
+        System.out.println("Patient Login:");
+        System.out.println("  Username: patient1");
         System.out.println("  Password: password123");
         System.out.println("==============================");
     }
@@ -134,5 +150,79 @@ public class DataInitializationService implements CommandLineRunner {
         adminUser.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(adminUser);
+    }
+
+    private void createTestPatient() {
+        // Create User
+        User patientUser = new User();
+        patientUser.setUsername("patient1");
+        patientUser.setPassword(passwordEncoder.encode("password123"));
+        patientUser.setEmail("patient@hospital.com");
+        patientUser.setFirstName("John");
+        patientUser.setLastName("Patient");
+        patientUser.setPhoneNumber("+1234567893");
+        patientUser.setRole(UserRole.PATIENT);
+        patientUser.setIsActive(true);
+        patientUser.setCreatedAt(LocalDateTime.now());
+        patientUser.setUpdatedAt(LocalDateTime.now());
+
+        User savedPatientUser = userRepository.save(patientUser);
+
+        // Create Patient profile
+        Patient patient = new Patient();
+        patient.setUser(savedPatientUser);
+        patient.setPatientId("PAT001");
+        patient.setDateOfBirth(LocalDate.of(1985, 5, 15));
+        patient.setGender("Male");
+        patient.setAddress("123 Main St, City, State 12345");
+        patient.setEmergencyContact("+1234567894");
+        patient.setMedicalHistory("No significant medical history");
+        patient.setAllergies("None known");
+        patient.setInsuranceProvider("Health Insurance Co.");
+        patient.setInsuranceNumber("INS123456789");
+        patient.setCreatedAt(LocalDateTime.now());
+        patient.setUpdatedAt(LocalDateTime.now());
+
+        patientRepository.save(patient);
+    }
+
+    private void initializeTimeSlots() {
+        // Get the test doctor
+        Doctor doctor = doctorRepository.findAll().stream()
+            .filter(d -> d.getUser().getUsername().equals("doctor1"))
+            .findFirst()
+            .orElse(null);
+
+        if (doctor != null) {
+            // Create time slots for the next 30 days
+            LocalDate startDate = LocalDate.now();
+            for (int i = 0; i < 30; i++) {
+                LocalDate currentDate = startDate.plusDays(i);
+                
+                // Skip weekends (Saturday = 6, Sunday = 7)
+                if (currentDate.getDayOfWeek().getValue() <= 5) {
+                    createTimeSlotsForDate(doctor, currentDate);
+                }
+            }
+        }
+    }
+
+    private void createTimeSlotsForDate(Doctor doctor, LocalDate date) {
+        // Create time slots from 9 AM to 5 PM with 30-minute intervals
+        LocalTime startTime = LocalTime.of(9, 0);
+        LocalTime endTime = LocalTime.of(17, 0);
+        
+        while (startTime.isBefore(endTime)) {
+            TimeSlot timeSlot = new TimeSlot();
+            timeSlot.setDoctor(doctor);
+            timeSlot.setSlotDate(date);
+            timeSlot.setStartTime(startTime);
+            timeSlot.setEndTime(startTime.plusMinutes(30));
+            timeSlot.setIsAvailable(true);
+            timeSlot.setSlotDurationMinutes(30);
+            
+            timeSlotRepository.save(timeSlot);
+            startTime = startTime.plusMinutes(30);
+        }
     }
 }
