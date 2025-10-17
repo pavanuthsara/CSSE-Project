@@ -11,6 +11,8 @@ import HospitalDashboard from './pages/kaveesha/HospitalDashboard';
 import PatientRegistration from './pages/kaveesha/PatientRegistration';
 import PatientManagement from './pages/kaveesha/PatientManagement';
 import AppointmentScheduler from './pages/kaveesha/AppointmentScheduler';
+import MedicalRecords from './pages/kaveesha/MedicalRecords';
+import HealthCardGenerator from './pages/kaveesha/HealthCardGenerator';
 import './App.css';
 
 function App() {
@@ -28,6 +30,8 @@ function App() {
         <Route path="/hospital/register" element={<PatientRegistration />} />
         <Route path="/hospital/management" element={<PatientManagement />} />
         <Route path="/hospital/appointments" element={<AppointmentScheduler />} />
+        <Route path="/hospital/records" element={<MedicalRecords />} />
+        <Route path="/hospital/health-cards" element={<HealthCardGenerator />} />
       </Routes>
     </Router>
   );
