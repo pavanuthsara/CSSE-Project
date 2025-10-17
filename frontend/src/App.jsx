@@ -9,6 +9,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
 import HospitalDashboard from './pages/kaveesha/HospitalDashboard';
 import PatientRegistration from './pages/kaveesha/PatientRegistration';
+import PatientManagement from './pages/kaveesha/PatientManagement';
 import './App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/hospital" element={<HospitalDashboard />} />
         <Route path="/hospital/register" element={<PatientRegistration />} />
+        <Route path="/hospital/management" element={<PatientManagement />} />
       </Routes>
     </Router>
   );
